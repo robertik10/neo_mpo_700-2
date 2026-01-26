@@ -6,24 +6,33 @@ import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription, LaunchContext
 from launch.actions import (
-    DeclareLaunchArgument, 
+    DeclareLaunchArgument,
     IncludeLaunchDescription,
-    OpaqueFunction
-    )
+    OpaqueFunction,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 import os
 
-def execution_stage(context: LaunchContext,
-                    robot_namespace,
-                    world,
-                    arm_type,
-                    ur_dc,
-                    imu_enable,
-                    d435_enable,
-                    scanner_type,
-                    gripper_type,
-                    docking_adapter):
+# HINT code added for project
+from launch.actions import GroupAction
+from launch_ros.actions import PushRosNamespace
+
+
+def execution_stage(
+    context: LaunchContext,
+    robot_namespace,
+    world,
+    arm_type,
+    ur_dc,
+    imu_enable,
+    d435_enable,
+    scanner_type,
+    gripper_type,
+    docking_adapter,
+    # HINT added for project
+    start_gz,
+):
 
     launch_actions = []
 
@@ -33,92 +42,121 @@ def execution_stage(context: LaunchContext,
     # Launch bringup_sim file from mp_bringup package
     bringup_sim_launch_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('mp_bringup'), 'launch', 'bringup_sim.launch.py')
+            os.path.join(
+                get_package_share_directory("mp_bringup"),
+                "launch",
+                "bringup_sim.launch.py",
+            )
         ),
         launch_arguments={
-            'robot_namespace': robot_namespace,
-            'robot_type': robot_type,
-            'world': world_name,
-            'arm_type': arm_type,
-            'use_ur_dc': ur_dc,
-            'imu_enable': imu_enable,
-            'd435_enable': d435_enable,
-            'scanner_type': scanner_type,
-            'gripper_type': gripper_type,
-            'use_docking_adapter': docking_adapter
+            "robot_namespace": robot_namespace,
+            "robot_type": robot_type,
+            "world": world_name,
+            "arm_type": arm_type,
+            "use_ur_dc": ur_dc,
+            "imu_enable": imu_enable,
+            "d435_enable": d435_enable,
+            "scanner_type": scanner_type,
+            "gripper_type": gripper_type,
+            "use_docking_adapter": docking_adapter,
+            "start_gz": start_gz,
+            "gz_partition": LaunchConfiguration("gz_partition"),
         }.items(),
     )
 
     # Add the launch command to the launch actions
     launch_actions.append(bringup_sim_launch_cmd)
 
-    return launch_actions
+    # return launch_actions
+    # HINT code added for project -> actually uses namespace as indended
+    return [GroupAction([PushRosNamespace(robot_namespace), *launch_actions])]
+
 
 def generate_launch_description():
+    declare_start_gz_cmd = DeclareLaunchArgument(
+        "start_gz", default_value="True", description="Start Gazebo instance"
+    )
+    declare_gz_partition_cmd = DeclareLaunchArgument(
+        "gz_partition", default_value="shared", description="Gazebo transport partition"
+    )
 
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
-            'robot_namespace', default_value='', description='Top-level namespace'
-        )
+        "robot_namespace", default_value="", description="Top-level namespace"
+    )
 
     declare_world_name_arg = DeclareLaunchArgument(
-            'world',
-            default_value='neo_workshop',
-            choices=['', 'neo_workshop'],
-            description='Simulation world to load'
-        )
+        "world",
+        default_value="neo_workshop",
+        choices=["", "neo_workshop"],
+        description="Simulation world to load",
+    )
 
     declare_arm_type_cmd = DeclareLaunchArgument(
-            'arm_type', default_value='',
-            choices=['', 'ur5', 'ur10', 'ur5e', 'ur10e', 'ec66', 'cs66'],
-            description='Arm Types\n\t'
-        )
+        "arm_type",
+        default_value="",
+        choices=["", "ur5", "ur10", "ur5e", "ur10e", "ec66", "cs66"],
+        description="Arm Types\n\t",
+    )
 
     declare_ur_pwr_variant_cmd = DeclareLaunchArgument(
-            'use_ur_dc', default_value='False',
-            description='Set this argument to True if you have an UR arm with DC variant'
-        )
+        "use_ur_dc",
+        default_value="False",
+        description="Set this argument to True if you have an UR arm with DC variant",
+    )
 
     declare_imu_cmd = DeclareLaunchArgument(
-            'imu_enable', default_value='False',
-            description='Enable IMU - Options: True/False'
-        )
+        "imu_enable",
+        default_value="False",
+        description="Enable IMU - Options: True/False",
+    )
 
     declare_realsense_cmd = DeclareLaunchArgument(
-            'd435_enable', default_value='False',
-            description='Enable Intel RealSense D435 camera if true'
-        )
+        "d435_enable",
+        default_value="False",
+        description="Enable Intel RealSense D435 camera if true",
+    )
 
     declare_scanner_type_cmd = DeclareLaunchArgument(
-            'scanner_type', default_value='sick_s300',
-            choices=['', 'sick_s300', 'sick_microscan3'],
-            description='Type of laser scanner to use\n\t'
-        )
+        "scanner_type",
+        default_value="sick_s300",
+        choices=["", "sick_s300", "sick_microscan3"],
+        description="Type of laser scanner to use\n\t",
+    )
 
     declare_gripper_type_cmd = DeclareLaunchArgument(
-            'gripper_type', default_value='',
-            choices=['', '2f_140', '2f_85'], # epick gripper not supported in simulation yet
-            description='Gripper Types\n\t'
-        )
+        "gripper_type",
+        default_value="",
+        choices=[
+            "",
+            "2f_140",
+            "2f_85",
+        ],  # epick gripper not supported in simulation yet
+        description="Gripper Types\n\t",
+    )
 
     declare_use_docking_adapter_cmd = DeclareLaunchArgument(
-            'use_docking_adapter', default_value='False',
-            description='Enable docking adapter if true'
-        )
+        "use_docking_adapter",
+        default_value="False",
+        description="Enable docking adapter if true",
+    )
 
     opq_function = OpaqueFunction(
         function=execution_stage,
         args=[
-            LaunchConfiguration('robot_namespace'),
-            LaunchConfiguration('world'),
-            LaunchConfiguration('arm_type'),
-            LaunchConfiguration('use_ur_dc'),
-            LaunchConfiguration('imu_enable'),
-            LaunchConfiguration('d435_enable'),
-            LaunchConfiguration('scanner_type'),
-            LaunchConfiguration('gripper_type'),
-            LaunchConfiguration('use_docking_adapter')
-        ])
+            LaunchConfiguration("robot_namespace"),
+            LaunchConfiguration("world"),
+            LaunchConfiguration("arm_type"),
+            LaunchConfiguration("use_ur_dc"),
+            LaunchConfiguration("imu_enable"),
+            LaunchConfiguration("d435_enable"),
+            LaunchConfiguration("scanner_type"),
+            LaunchConfiguration("gripper_type"),
+            LaunchConfiguration("use_docking_adapter"),
+            # HINT added for project
+            LaunchConfiguration("start_gz"),
+        ],
+    )
 
     ld = LaunchDescription([
         declare_namespace_cmd,
@@ -130,6 +168,9 @@ def generate_launch_description():
         declare_scanner_type_cmd,
         declare_gripper_type_cmd,
         declare_use_docking_adapter_cmd,
-        opq_function
+        # HINT added for project
+        declare_start_gz_cmd,
+        declare_gz_partition_cmd,
+        opq_function,
     ])
     return ld

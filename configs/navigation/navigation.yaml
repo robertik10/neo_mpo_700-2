@@ -57,7 +57,9 @@ neo_localization2_node:
     # if to broadcast map frame
     broadcast_tf: true
     # Scan topic
-    scan_topic: "lidar_1/scan_filtered"
+    # HINT changed for projectq
+    # scan_topic: "lidar_1/scan_filtered"
+    scan_topic: "lidar_2/scan_filtered"
     # Initial Pose topic
     initialpose: initialpose
     # Map Tile topic
@@ -104,7 +106,9 @@ amcl:
     sigma_hit: 0.2
     tf_broadcast: true
     transform_tolerance: 0.1
-    scan_topic: /lidar_1/scan_filtered
+    # HINT changed for project
+    # scan_topic: /lidar_1/scan_filtered
+    scan_topic: lidar_2/scan_filtered
     update_min_a: 0.1
     update_min_d: 0.1
     # z_hit: 0.5
@@ -115,7 +119,9 @@ bt_navigator:
   ros__parameters:
     global_frame: map
     robot_base_frame: base_link
-    odom_topic: /odom
+    # HINT changed for project
+    # odom_topic: /odom
+    odom_topic: odom
     bt_loop_duration: 10
     default_nav_to_pose_bt_xml: "$(find-pkg-share neo_mpo_700-2)/configs/navigation/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml"
     default_nav_through_poses_bt_xml: "$(find-pkg-share neo_mpo_700-2)/configs/navigation/behavior_trees/navigate_through_poses_w_replanning_and_recovery.xml"
@@ -208,7 +214,9 @@ local_costmap:
         enabled: True
         observation_sources: scan scan1
         scan:
-          topic: /lidar_1/scan_filtered
+          # HINT changed for project
+          # topic: /lidar_1/scan_filtered
+          topic: lidar_1/scan_filtered
           max_obstacle_height: 2.0
           raytrace_max_range: 8.0
           obstacle_max_range: 5.0
@@ -216,7 +224,9 @@ local_costmap:
           marking: True
           data_type: "LaserScan"
         scan1:
-          topic: /lidar_2/scan_filtered
+          # HINT changed for project
+          # topic: /lidar_2/scan_filtered
+          topic: lidar_2/scan_filtered
           max_obstacle_height: 2.0
           raytrace_max_range: 8.0
           obstacle_max_range: 5.0
@@ -242,7 +252,9 @@ global_costmap:
         enabled: True
         observation_sources: scan scan1
         scan:
-          topic: /lidar_1/scan_filtered
+          # HINT changed for project
+          # topic: /lidar_1/scan_filtered
+          topic: lidar_1/scan_filtered
           max_obstacle_height: 2.0
           raytrace_max_range: 8.0
           obstacle_max_range: 5.0
@@ -250,7 +262,9 @@ global_costmap:
           marking: True
           data_type: "LaserScan"
         scan1:
-          topic: /lidar_2/scan_filtered
+          # HINT changed for project
+          # topic: /lidar_2/scan_filtered
+          topic: lidar_2/scan_filtered
           max_obstacle_height: 2.0
           raytrace_max_range: 8.0
           obstacle_max_range: 5.0

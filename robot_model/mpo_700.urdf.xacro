@@ -13,6 +13,10 @@ Contributor: Adarsh Karan K P
   <xacro:arg name="scanner_type" default="sick_s300"/>
   <xacro:arg name="use_docking_adapter" default="false"/>
   <xacro:arg name="disable_scanners" default="false"/>
+  <!-- added for porject namespacing -->
+  <xacro:arg name="robot_namespace" default="robot1"/>
+  <xacro:arg name="enable_system_plugins" default="true"/>
+
 
   <!-- Manipulator Arguments-->
   <xacro:arg name="arm_type" default=""/>
@@ -200,7 +204,9 @@ Contributor: Adarsh Karan K P
   <!-- Simulation -->
   <xacro:if value="${gz == True}">
     <xacro:include filename="$(find mp_components)/urdf/gazebo/mpo_700/mpo_700_gazebo.urdf.xacro" />
-    <xacro:mpo_700_gazebo />
+    <xacro:mpo_700_gazebo
+      robot_namespace="$(arg robot_namespace)"
+      enable_system_plugins="$(arg enable_system_plugins)"/>
   </xacro:if>
 
 </robot>
