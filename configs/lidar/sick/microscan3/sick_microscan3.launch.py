@@ -1,8 +1,27 @@
 from launch import LaunchDescription
-from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument, GroupAction
+from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch_ros.actions import Node, PushRosNamespace
+from launch_ros.descriptions import ParameterValue
 
 def generate_launch_description():
+    namespace = LaunchConfiguration('namespace', default='')
+
+    frame_id_1 = ParameterValue(
+        PythonExpression([
+            "'lidar_1_link' if '", namespace, "' == '' else '", namespace, "/lidar_1_link'"
+        ]),
+        value_type=str
+    )
+    frame_id_2 = ParameterValue(
+        PythonExpression([
+            "'lidar_2_link' if '", namespace, "' == '' else '", namespace, "/lidar_2_link'"
+        ]),
+        value_type=str
+    )
+    
     return LaunchDescription([
+        DeclareLaunchArgument('namespace', default_value=''),
         Node(
             package="sick_safetyscanners2",
             executable="sick_safetyscanners2_node",
@@ -10,7 +29,7 @@ def generate_launch_description():
             output="screen",
             emulate_tty=True,
             parameters=[
-                {"frame_id": "lidar_1_link",
+                {"frame_id": frame_id_1,
                  "sensor_ip": "192.168.1.30",
                  "host_ip": "192.168.1.10",
                  "interface_ip": "0.0.0.0",
@@ -30,7 +49,7 @@ def generate_launch_description():
                  "min_intensities": 0.0}
             ],
             remappings=[
-                ('/scan', '/lidar_1/scan_filtered'),
+                ('scan', 'lidar_1/scan_filtered'),
             ]
         ), Node(
             package="sick_safetyscanners2",
@@ -39,7 +58,7 @@ def generate_launch_description():
             output="screen",
             emulate_tty=True,
             parameters=[
-                {"frame_id": "lidar_2_link",
+                {"frame_id": frame_id_2,
                  "sensor_ip": "192.168.1.31",
                  "host_ip": "192.168.1.10",
                  "interface_ip": "0.0.0.0",
@@ -59,7 +78,7 @@ def generate_launch_description():
                  "min_intensities": 0.0}
             ],
             remappings=[
-                ('/scan', '/lidar_2/scan_filtered'),
+                ('scan', 'lidar_2/scan_filtered'),
             ]
         )
     ])
