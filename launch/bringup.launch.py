@@ -89,8 +89,8 @@ def execution_stage(context: LaunchContext,
             'frame_prefix': rp_ns
         }],
         remappings=[
-            ('/tf', 'tf'),
-            ('/tf_static', 'tf_static'),
+            #('/tf', 'tf'),
+            #('/tf_static', 'tf_static'),
             ],
         arguments=[urdf]
     )
